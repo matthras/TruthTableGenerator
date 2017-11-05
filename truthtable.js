@@ -121,7 +121,7 @@ function construct() {
 		return alert("One of the formulas you entered is not well formed");
 	}
 	
-	var table = mkTable(formulas,trees);
+	var table = makeTable(formulas,trees);
 	
 	if(full || main) {
 		var htmltable = htmlTable(table,trees,main,tv);
@@ -138,7 +138,7 @@ function construct() {
 }
 
 // (Table,[Tree],Boolean) -> String
-// Takes a table (as output by mkTable), the trees it's a table of, and a boolean and
+// Takes a table (as output by makeTable), the trees it's a table of, and a boolean and
 // returns an HTML table. If the boolean is set to true, it only prints the column 
 // under the main connective.
 function htmlTable(table,trees,flag,tv) {
@@ -148,13 +148,13 @@ function htmlTable(table,trees,flag,tv) {
 		mcs.push(mcindex(trees[i]))
 	}
 	var out = '<table class="truth">'; // start the html table
-	out += mkTHrow(table); // make the top th row
+	out += makeTHrow(table); // make the top th row
 	for(var i=1;i<table[0].length;i++) { // make the td rows below
-		out += mkTDrow(table,i);
+		out += makeTDrow(table,i);
 	}
 	return out+'</table>'; // return the html table
 	
-	function mkTHrow(tbl) {
+	function makeTHrow(tbl) {
 		var rw = '<tr>';
 		for(var i=0;i<tbl.length;i++) { // i = table segment
 			for(var j=0;j<tbl[i][0].length;j++) { // row = 0, j = cell
@@ -168,7 +168,7 @@ function htmlTable(table,trees,flag,tv) {
 		return rw+'</tr>';
 	}
 	
-	function mkTDrow(tbl,r) {
+	function makeTDrow(tbl,r) {
 		var rw = '<tr>';
 		for(var i=0;i<tbl.length;i++) { // i = table segment
 			for(var j=0;j<tbl[i][r].length;j++) { // r = row, j = cell
@@ -189,7 +189,7 @@ function htmlTable(table,trees,flag,tv) {
 }
 
 // Table -> String
-// Takes a table (as output by mkTable) and returns a text version of the table.
+// Takes a table (as output by makeTable) and returns a text version of the table.
 function textTable(table,tv) {
 	var rownum = table[0].length;
 	var bcind =  []; // an array of arrays of ints, locations of biconditionals
@@ -197,14 +197,14 @@ function textTable(table,tv) {
 		bcind.push(bcInd(table[i][0]));
 	}
 	var out = '';
-	out += mkrow(table,0); // make top row
+	out += makeTableRow(table,0); // make top row
 	out += '\r\n'+out.replace(/./g,'-')+'\r\n'; // put a string of '-' beneath the top row
 	for(var i=1;i<table[0].length;i++) { // make remaining rows
-		out += mkrow(table,i)+'\r\n';	
+		out += makeTableRow(table,i)+'\r\n';	
 	}
 	return out;
 	
-	function mkrow(tbl,r) { // makes a table row
+	function makeTableRow(tbl,r) { // makes a table row
 		var rw = '';
 		for(var i=0;i<tbl.length;i++) { // i = table segment
 			for(var j=0;j<tbl[i][r].length;j++) { // r = row, j = cell
@@ -224,7 +224,7 @@ function textTable(table,tv) {
 
 
 // Table -> String
-// Takes a table (as output by mkTable) and the trees its a table of and returns a LaTex version of the table.
+// Takes a table (as output by makeTable) and the trees its a table of and returns a LaTex version of the table.
 function latexTable(table,trees,tv) {
 	var rownum = table[0].length;
 	var mcs = []; // indices of the main connectives
@@ -232,14 +232,14 @@ function latexTable(table,trees,tv) {
 		mcs.push(mcindex(trees[i]))
 	}
 	var out = '';
-	var dividers = [];// this variable gets updated by the mkrow function; sorry for the non-transparent code
-	var colnum = 0;// this variable gets updated by the mkrow function; sorry for the non-transparent code
-	var parloc = [];// this variable gets updated by the mkrow function; sorry for the non-transparent code
+	var dividers = [];// this variable gets updated by the makeTableRow function; sorry for the non-transparent code
+	var colnum = 0;// this variable gets updated by the makeTableRow function; sorry for the non-transparent code
+	var parloc = [];// this variable gets updated by the makeTableRow function; sorry for the non-transparent code
 
-	out += mkrow(table,0); // make top row
+	out += makeTableRow(table,0); // make top row
 	out += '\\\\\r\n\\hline \r\n'; //
 	for(var i=1;i<table[0].length;i++) { // make remaining rows
-		out += mkrow(table,i)+'\\\\\r\n';	
+		out += makeTableRow(table,i)+'\\\\\r\n';	
 	}
 	var begintable = '\%NOTE: requires \\usepackage{color}\r\n\\begin{tabular}{';
 	for(var i=0;i<colnum;i++) {
@@ -256,7 +256,7 @@ function latexTable(table,trees,tv) {
 	
 	return begintable+'}\r\n'+out+'\\end{tabular}';
 	
-	function mkrow(tbl,r) { // makes a table row
+	function makeTableRow(tbl,r) { // makes a table row
 		dividers = [];
 		colnum = 0;
 		
@@ -285,17 +285,17 @@ function mcindex(t) {
 	if(t.length == 2 || t.length==1) {
 		return 0;
 	} else {
-		return countleaves(t[1])+1;
+		return countLeaves(t[1])+1;
 	}
 }
 
 // Tree -> Int
 // Takes a tree and returns the number of leaves (terminal nodes) in the tree
-function countleaves(t) {
+function countLeaves(t) {
 	var out = 0;
 	for(var i=0;i<t.length;i++) {
 		if(t[i] instanceof Array) {
-			out += countleaves(t[i]);
+			out += countLeaves(t[i]);
 		} else {out += 1;}
 	}
 	return out;
@@ -306,8 +306,8 @@ function countleaves(t) {
 // multidimensional array.  For n formulas, the array contains n+1 elements.  The first
 // element is the lhs of the table, and the succeeding elements are the table segments
 // for each passed formula.
-function mkTable(fs,ts) {
-	var lhs = mklhs(fs);
+function makeTable(fs,ts) {
+	var lhs = makeLHStable(fs);
 	var rhs = [];
 	for(var i=0;i<fs.length;i++) {
 		rhs.push(mktseg(fs[i],ts[i],lhs));
@@ -318,13 +318,13 @@ function mkTable(fs,ts) {
 // [String] -> LHSTable
 // Takes an array of strings and makes the left hand side of a table (i.e. the rows
 // with all the tv assignments)
-function mklhs(fs) {
+function makeLHStable(fs) {
 	var atomic = [];
 	var tvrows = [];
 	for(var i=0;i<fs.length;i++) {
 		atomic = atomic.concat(getatomic(fs[i]))
 	}
-	atomic = sorted(rmDup(atomic));
+	atomic = sortArray(removeDuplicates(atomic));
 	if(atomic.indexOf('#')>=0) {
 		tvrows = tvcomb(atomic.length-1);
 		tvrows = tvrows.map(function(x) {return [false].concat(x);});
@@ -339,7 +339,7 @@ function mktseg(f,t,lhs) {
 	var tbrows=[];
 	for(var i=1;i<lhs.length;i++) {
 		var a = mkAss(lhs[0],lhs[i]);
-		var row = evlTree(t,a);
+		var row = evaluateTree(t,a);
 		row = flatten(row);
 		tbrows.push(row);
 	}
@@ -354,11 +354,11 @@ function mktseg(f,t,lhs) {
 
 // String -> [Char]
 // Takes a wff and returns an array with all the atomic sentences in the wff.  The 
-// array has duplicates removed and is sorted in alphabetical order.
+// array has duplicates removed and is sortArray in alphabetical order.
 function getatomic(s) {
 	var out = [];
 	for(var i=0;i<s.length;i++) {
-		if(isA(s[i])) {out.push(s[i]);}
+		if(isAtomic(s[i])) {out.push(s[i]);}
 	}
 	return out;
 }
@@ -399,13 +399,13 @@ function flatten(t) {
 // (Tree,Assignment) -> Tree
 // Takes a tree and an assignment of booleans to atomic sentences and returns an 
 // evaluated tree (i.e. with all atomic sentences and connectives replaced by booleans).
-function evlTree(t,a) {
+function evaluateTree(t,a) {
 	if(t.length==5) {
-		var t1 = evlTree(t[1],a);
-		var t3 = evlTree(t[3],a);
+		var t1 = evaluateTree(t[1],a);
+		var t3 = evaluateTree(t[3],a);
 		return ['',t1,gtTv([t[2],t1,t3]),t3,'']
 	} else if(t.length==2) {
-		var t1 = evlTree(t[1],a);
+		var t1 = evaluateTree(t[1],a);
 		return [gtTv([t[0],t1]),t1];
 	} else if(t.length==1) {
 		return [a[t[0]]];
@@ -435,13 +435,13 @@ function gtTv(arr) {
 }
 
 // Remove duplicates from an array
-function rmDup(a) {
+function removeDuplicates(a) {
 	return a.filter(function(el,pos) {return a.indexOf(el)==pos;});
 }
 
 // [Char] -> [Char]
 // Takes an array of chars and returns the array sorted from smallest to largest
-function sorted(a) {
+function sortArray(a) {
 	var b = a.map(function(x) {return x.charCodeAt(0);});
 	b = b.sort(function(b,c) {return b-c;});
 	return b.map(function(x) {return String.fromCharCode(x);});
@@ -465,12 +465,12 @@ function parse(s) {
 	if(s.length==0) {return [];}
 	var s1 = [];
 	var s2 = [];
-	if(isU(s[0])) {
+	if(isUnary(s[0])) {
 		s1 = parse(s.substring(1));
 		return s1.length ? [s[0],s1] : [];
 	}
 	if(s[0] =='(' && s[s.length-1]==')') {
-		var a = gSub(s);
+		var a = splitbyBinaryConnective(s);
 		if(a.indexOf(undefined)>=0 || a.indexOf('')>=0) {
 			return [];
 		} else {
@@ -481,12 +481,12 @@ function parse(s) {
 			} else {return [];}
 		}
 	}
-	else {return isA(s) ? [s] : []}
+	else {return isAtomic(s) ? [s] : []}
 }
 
 // String -> Bool
 // Determines if s is an atomic wff
-function isA(s) {
+function isAtomic(s) {
 	if(s.length!=1) {return false;}
 	var pr = '#ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuwxyz';
 	return pr.indexOf(s)>=0;
@@ -495,7 +495,7 @@ function isA(s) {
 
 // String -> Bool
 // Determines if s begins with a unary connective
-function isU(s) {
+function isUnary(s) {
 	return s.indexOf('~')==0;
 }
 
@@ -504,7 +504,7 @@ function isU(s) {
 // binary connective enclosed only by the outermost parentheses.  If so, returns an array
 // with the string to the left and the string to the right of the binary connective; 
 // otherwise returns an array of three undefined's.
-function gSub(s) {
+function splitbyBinaryConnective(s) {
 	var stk = [];
 	var l = 0;
 	for(var i=0;i<s.length;i++) {
